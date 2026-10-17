@@ -26,6 +26,7 @@ import { JourneyView } from "./journey-view";
 import { SavedView } from "./saved-view";
 import { SettingsView } from "./settings-view";
 import { WorkspaceDialogs } from "./workspace-dialogs";
+import { PlaybackControls } from "./playback-controls";
 export function WorkerWorkspace() {
   const workspace = useWorkspace();
   const {
@@ -203,6 +204,9 @@ export function WorkerWorkspace() {
           </div>
         </header>
         <main className="content" id="main-content">
+          {(view === "settings" || view === "saved") && (
+            <PlaybackControls workspace={workspace} />
+          )}
           {error && (
             <div className="error-banner" role="alert">
               <CircleHelp size={20} />

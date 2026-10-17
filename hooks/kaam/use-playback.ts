@@ -1,4 +1,5 @@
 import { response, withAbort } from "@/lib/kaam/client";
+import { SpeechCache } from "@/lib/kaam/speech-cache";
 import type { ChatMessage, Language } from "@/lib/kaam/contracts";
 import {
   useEffect,
@@ -19,20 +20,14 @@ type Options = {
   abortRef: RefObject<AbortController | null>;
 };
 
-export function usePlayback({
-  busy,
-  recording,
-  autoSpeak,
-  language,
-  setBusy,
-  setError,
-  abortRef,
-}: Options) {
+export function usePlayback({ busy, recording, autoSpeak, language, setError }: Options) {
   const [playing, setPlaying] = useState<string | null>(null);
   const [paused, setPaused] = useState(false);
+  const [audioPreparing, setAudioPreparing] = useState(false);
   const audio = useRef<HTMLAudioElement | null>(null);
   const audioUrl = useRef<string | null>(null);
   const request = useRef<AbortController | null>(null);
+  const cache = useRef(new SpeechCache());
   const autoSpeakRef = useRef(autoSpeak);
   useEffect(() => {
     autoSpeakRef.current = autoSpeak;
@@ -40,19 +35,30 @@ export function usePlayback({
 
   function stopAudio() {
     request.current?.abort();
-    audio.current?.pause();
+    request.current = null;
+    if (audio.current) {
+      audio.current.onended = null;
+      audio.current.onerror = null;
+      audio.current.pause();
+    }
     audio.current = null;
     if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
     audioUrl.current = null;
     setPlaying(null);
     setPaused(false);
+    setAudioPreparing(false);
+  }
+  function clearAudioCache() {
+    cache.current.clear();
   }
   async function resumeAudio() {
+    const player = audio.current;
+    if (!player) return;
     try {
-      await audio.current?.play();
-      setPaused(false);
+      await player.play();
+      if (audio.current === player) setPaused(false);
     } catch {
-      setPaused(true);
+      if (audio.current === player) setPaused(true);
     }
   }
   function togglePause() {
@@ -70,50 +76,71 @@ export function usePlayback({
     stopAudio();
     setPlaying(message.id);
     setError("");
-    setBusy(true);
+    const text = message.text.slice(0, 5000);
+    const key = JSON.stringify([language, text]);
     const controller = new AbortController();
     request.current = controller;
-    abortRef.current = controller;
     try {
-      const res = await withAbort(
-        fetch("/api/speech", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: message.text.slice(0, 5000), language }),
-          signal: controller.signal,
-        }),
-        controller.signal,
-      );
-      if (!res.ok) await response(res);
-      const blob = await withAbort(res.blob(), controller.signal);
+      let blob = cache.current.get(key);
+      if (!blob) {
+        setAudioPreparing(true);
+        const res = await withAbort(
+          fetch("/api/speech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, language }),
+            signal: controller.signal,
+          }),
+          controller.signal,
+        );
+        if (!res.ok) await response(res);
+        blob = await withAbort(res.blob(), controller.signal);
+        controller.signal.throwIfAborted();
+        cache.current.set(key, blob);
+      }
       controller.signal.throwIfAborted();
       audioUrl.current = URL.createObjectURL(blob);
       const player = new Audio(audioUrl.current);
       audio.current = player;
       player.onended = stopAudio;
       player.onerror = () => {
+        if (audio.current !== player) return;
         stopAudio();
         setError("REQUEST_FAILED");
       };
+      setAudioPreparing(false);
       // A blocked autoplay retains the prepared audio; Resume is a user gesture.
       await resumeAudio();
     } catch (error) {
+      // A cancelled, older request must never stop newer playback or replace its error.
+      if (request.current !== controller) return;
       const cancelled = controller.signal.aborted;
       stopAudio();
       if (!cancelled) setError(error instanceof Error ? error.message : "REQUEST_FAILED");
     } finally {
-      if (request.current === controller) request.current = null;
-      if (abortRef.current === controller) abortRef.current = null;
-      setBusy(false);
+      if (request.current === controller) {
+        request.current = null;
+        setAudioPreparing(false);
+      }
     }
   }
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    const sessionCache = cache.current;
+    return () => {
       request.current?.abort();
       audio.current?.pause();
       if (audioUrl.current) URL.revokeObjectURL(audioUrl.current);
-    },
-    [],
-  );
-  return { playing, paused, audio, stopAudio, togglePause, speak };
+      sessionCache.clear();
+    };
+  }, []);
+  return {
+    playing,
+    paused,
+    audioPreparing,
+    audio,
+    stopAudio,
+    clearAudioCache,
+    togglePause,
+    speak,
+  };
 }

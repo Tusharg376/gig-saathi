@@ -1,6 +1,13 @@
 import { useNavigationFocus } from "./use-navigation-focus";
 import { icons, labels, View } from "@/components/kaam/presentation";
 import { parsedAnswer, request } from "@/lib/kaam/client";
+import {
+  createProposalCommitter,
+  earningConfirmation,
+  earningHistory,
+  isEarningsIntent,
+  earningStatusMessage,
+} from "@/lib/kaam/earning-confirmation";
 import { createLedgerContext } from "@/lib/kaam/context";
 import {
   totals,
@@ -39,6 +46,8 @@ export function useWorkspace() {
   useNavigationFocus(sidebar, closeNavigation);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [pendingEarningId, setPendingEarningId] = useState<string | null>(null);
+  const commitProposal = useRef(createProposalCommitter());
   const [complaintIncident, setComplaintIncident] = useState("");
   const voiceTarget = useRef<"chat" | "complaint">("chat");
   const complaintInputRef = useRef<HTMLTextAreaElement>(null);
@@ -46,11 +55,15 @@ export function useWorkspace() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [configured, setConfigured] = useState<boolean | null>(null);
-  const [entry, setEntry] = useState<{
+  const [entry, setEntryState] = useState<{
     initial?: EarningInput;
     id?: string;
     messageId?: string;
   } | null>(null);
+  function setEntry(next: typeof entry) {
+    if (!next) setPendingEarningId(null);
+    setEntryState(next);
+  }
   const [draft, setDraft] = useState<Draft | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     kind: "entry" | "draft" | "all";
@@ -131,6 +144,8 @@ export function useWorkspace() {
     requestAnimationFrame(() => inputRef.current?.focus());
   }
   function navigate(next: View) {
+    cancelRecording();
+    if (!["earnings", "general", "home"].includes(next)) setPendingEarningId(null);
     setView(next);
     setAssistantOpen(false);
     setSidebar(false);
@@ -155,24 +170,86 @@ export function useWorkspace() {
     grievance?: GrievanceFacts,
     showConversation = true,
   ) {
-    if (!text.trim() || busy || recording || startingMic || !ensureProfile()) return;
+    if (!text.trim() || busy || saving || recording || startingMic || !ensureProfile())
+      return;
     if (showConversation) setAssistantOpen(true);
     stopAudio();
-    const mode =
+    const selectedMode =
       forcedMode ||
       ((["home", "saved", "settings"].includes(view) ? "general" : view) as Mode);
+    const mode: Mode =
+      selectedMode === "general" && (pendingEarningId || isEarningsIntent(text))
+        ? "earnings"
+        : selectedMode;
+    if (mode === "earnings") setView("earnings");
+    const proposal = messages.find((m) => m.id === pendingEarningId);
+    const intent = earningConfirmation(text);
+    if (
+      mode === "earnings" &&
+      proposal?.answer?.earning &&
+      !proposal.accepted &&
+      intent
+    ) {
+      if (intent === "cancel") {
+        setPendingEarningId(null);
+        setInput("");
+        setToast(
+          t(
+            "Entry not saved. Tell me the corrected details.",
+            "एंट्री नहीं सहेजी गई। सही जानकारी बताएँ।",
+          ),
+        );
+        return;
+      }
+      const saved = await saveProposal(proposal.id, proposal.answer.earning);
+      if (saved) {
+        setInput("");
+        const confirmation: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          text: t("Earning saved on this device.", "कमाई इस डिवाइस पर सहेजी गई।"),
+        };
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: "user", text: text.trim() },
+          confirmation,
+        ]);
+        if (data.profile?.autoSpeak) void speak(confirmation, true);
+        return confirmation;
+      }
+      return;
+    }
+    if (mode === "earnings" && intent === "confirm") {
+      setToast(
+        t(
+          "No new entry is waiting. Review an entry or describe new earnings first.",
+          "कोई नई एंट्री पुष्टि के लिए नहीं है। पहले एंट्री जाँचें या नई कमाई बताएँ।",
+        ),
+      );
+      setInput("");
+      return;
+    }
+    // Further questions or corrections require a new proposal before a spoken yes.
+    setPendingEarningId(null);
     const user: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
       text: text.trim(),
     };
     let reply: ChatMessage | undefined;
-    const history = messages.slice(-16).map((m) => ({ role: m.role, text: m.text }));
+    const history =
+      mode === "earnings"
+        ? earningHistory(messages)
+        : messages.slice(-16).map((m) => ({ role: m.role, text: m.text }));
     setMessages((prev) => [...prev, user]);
     if (!grievance) setInput("");
     setError("");
     setBusy(true);
-    if (view === "home" || view === "saved" || view === "settings") setView("general");
+    if (
+      mode !== "earnings" &&
+      (view === "home" || view === "saved" || view === "settings")
+    )
+      setView("general");
     abort.current = new AbortController();
     try {
       const result = parsedAnswer(
@@ -202,9 +279,12 @@ export function useWorkspace() {
       reply = {
         id: crypto.randomUUID(),
         role: "assistant",
-        text: result.message,
+        text: result.earning
+          ? earningStatusMessage(result.earning, language)
+          : result.message,
         answer: result,
       };
+      if (result.earning && mode === "earnings") setPendingEarningId(reply.id);
       setMessages((prev) => [...prev, reply!]);
     } catch (e) {
       setMessages((previous) => previous.filter((message) => message.id !== user.id));
@@ -284,10 +364,10 @@ export function useWorkspace() {
     seconds,
     transcribing,
     startingMic,
-    recorder,
-    discardAudio,
     startRecording: beginRecording,
     record,
+    sendRecording,
+    cancelRecording,
   } = useVoice({
     busy,
     setBusy,
@@ -308,14 +388,29 @@ export function useWorkspace() {
     abort,
   });
   function startRecording() {
-    if (!recording) voiceTarget.current = "chat";
+    if (!recording) {
+      stopAudio();
+      voiceTarget.current = "chat";
+    }
     return beginRecording();
   }
   function startComplaintRecording() {
-    if (!recording) voiceTarget.current = "complaint";
+    if (!recording) {
+      stopAudio();
+      voiceTarget.current = "complaint";
+    }
     return beginRecording();
   }
-  const { playing, paused, audio, stopAudio, togglePause, speak } = usePlayback({
+  const {
+    playing,
+    paused,
+    audio,
+    audioPreparing,
+    clearAudioCache,
+    stopAudio,
+    togglePause,
+    speak,
+  } = usePlayback({
     busy,
     recording,
     autoSpeak: data.profile?.autoSpeak ?? false,
@@ -325,8 +420,37 @@ export function useWorkspace() {
     abortRef: abort,
   });
   useEffect(() => () => abort.current?.abort(), []);
+  async function saveProposal(messageId: string, value: EarningInput) {
+    return commitProposal.current(messageId, async () => {
+      setError("");
+      if (!messages.some((m) => m.id === messageId && !m.accepted)) return false;
+      const id = `proposal-${messageId}`;
+      if (data.earnings.some((earning) => earning.id === id)) return false;
+      if (!(await persist({ ...data, earnings: [...data.earnings, { ...value, id }] })))
+        return false;
+      setPendingEarningId(null);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? {
+                ...m,
+                accepted: true,
+                text: earningStatusMessage(value, language, true),
+                answer: m.answer ? { ...m.answer, earning: value } : undefined,
+              }
+            : m,
+        ),
+      );
+      setToast(t("Earning saved on this device.", "कमाई इस डिवाइस पर सहेजी गई।"));
+      return true;
+    });
+  }
   async function saveEntry(value: EarningInput) {
-    if (!entry) return;
+    if (!entry || saving) return;
+    if (entry.messageId && !entry.id) {
+      if (await saveProposal(entry.messageId, value)) setEntry(null);
+      return;
+    }
     const next = entry.id
       ? data.earnings.map((e) => (e.id === entry.id ? { ...value, id: e.id } : e))
       : [...data.earnings, { ...value, id: crypto.randomUUID() }];
@@ -359,9 +483,10 @@ export function useWorkspace() {
       setSaving(true);
       try {
         abort.current?.abort();
-        discardAudio.current = true;
-        if (recorder.current?.state === "recording") recorder.current.stop();
+        cancelRecording();
         stopAudio();
+        clearAudioCache();
+        setPendingEarningId(null);
         await clearData();
         setData({ ...emptyData });
         setLanguage("hi");
@@ -445,6 +570,7 @@ export function useWorkspace() {
     general: [["Help me understand my options", "मेरे विकल्प समझने में मदद करें"]],
   };
   return {
+    pendingEarningId,
     complaintIncident,
     setComplaintIncident,
     complaintInputRef,
@@ -499,6 +625,7 @@ export function useWorkspace() {
     recording,
     seconds,
     playing,
+    audioPreparing,
     paused,
     transcribing,
     startingMic,
@@ -523,6 +650,8 @@ export function useWorkspace() {
     speak,
     startRecording,
     record,
+    sendRecording,
+    cancelRecording,
     saveEntry,
     saveDraft,
     remove,

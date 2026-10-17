@@ -2477,6 +2477,48 @@ th,
   min-height: 44px;
   padding: 8px;
 }
+.playback-action {
+  border: 1px solid #90b8a7;
+  border-radius: 10px;
+  background: #fff;
+  color: #174d40;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.playback-stop {
+  background: #174d40;
+  border-color: #174d40;
+  color: #fff;
+}
+.recording-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.composer.is-recording {
+  flex-wrap: wrap;
+}
+.composer.is-recording .recording-actions {
+  flex: 1 1 100%;
+  justify-content: flex-end;
+}
+.composer.is-recording .recording-actions button {
+  width: auto;
+  min-height: 44px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-weight: 600;
+}
+.playback-action:focus-visible,
+.recording-actions button:focus-visible {
+  outline: 3px solid #227c68;
+  outline-offset: 3px;
+}
 .voice-status span {
   display: flex;
   gap: 8px;

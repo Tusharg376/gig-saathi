@@ -113,6 +113,18 @@ export function Conversation({
                   t("You", "आप")
                 )}
               </div>
+              {m.answer?.earning && (
+                <p className="earning-status" role="status">
+                  <strong>
+                    {m.accepted
+                      ? t("Saved on this device", "इस डिवाइस पर सहेजा गया")
+                      : t(
+                          "Not saved yet — confirm below",
+                          "अभी सहेजा नहीं गया — नीचे पुष्टि करें",
+                        )}
+                  </strong>
+                </p>
+              )}
               <div className="message-text">{m.text}</div>
               {m.answer?.sources.length ? (
                 <div className="sources">
@@ -154,6 +166,20 @@ export function Conversation({
                       {m.answer.earning.date} · {t("Net", "शुद्ध")}{" "}
                       {money(totals([m.answer.earning]).net, language)}
                     </p>
+                    <p>
+                      {t("Income", "कमाई")}: {money(m.answer.earning.income, language)} ·{" "}
+                      {t("Expenses", "खर्च")}:{" "}
+                      {money(m.answer.earning.expenses, language)} · {t("Hours", "घंटे")}:{" "}
+                      {m.answer.earning.hours}
+                    </p>
+                    {!m.accepted && workspace.pendingEarningId === m.id && (
+                      <small>
+                        {t(
+                          "Check these details. Say or type ‘yes’ to save, or use Review & save to edit.",
+                          "जानकारी जाँचें। सहेजने के लिए ‘हाँ’ बोलें या लिखें, या बदलाव के लिए ‘जाँचें और सहेजें’ चुनें।",
+                        )}
+                      </small>
+                    )}
                   </div>
                   <button
                     className="btn small primary"

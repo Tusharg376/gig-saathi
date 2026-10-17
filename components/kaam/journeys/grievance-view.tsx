@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FilePenLine, Mic, Square, ExternalLink, Phone } from "lucide-react";
+import { FilePenLine, Mic, CircleStop, ExternalLink, Phone } from "lucide-react";
 import type { Workspace } from "@/hooks/kaam/use-workspace";
 import { grievanceSchema } from "@/lib/kaam/contracts";
 import { complaintTypes, routesForComplaint } from "@/lib/kaam/complaints";
@@ -137,7 +137,7 @@ export function GrievanceView({ workspace: w }: { workspace: Workspace }) {
             placeholder={current.prompt[hi ? 1 : 0]}
           />
         </label>
-        <div className="feature-actions">
+        <div className="feature-actions recording-actions">
           <button
             type="button"
             className="btn secondary"
@@ -145,14 +145,25 @@ export function GrievanceView({ workspace: w }: { workspace: Workspace }) {
             onClick={() => {
               setConfirmed(false);
               w.stopAudio();
-              w.startComplaintRecording();
+              if (w.recording) w.cancelRecording();
+              else w.startComplaintRecording();
             }}
           >
-            {w.recording ? <Square size={16} /> : <Mic size={16} />}{" "}
+            {w.recording ? <CircleStop size={16} /> : <Mic size={16} />}{" "}
             {w.recording
-              ? t("Stop recording", "रिकॉर्डिंग रोकें")
+              ? t("Stop and discard", "रोकें और हटाएँ")
               : t("Describe by voice", "बोलकर बताएँ")}
           </button>
+          {w.startingMic && (
+            <button type="button" className="text-btn" onClick={w.cancelRecording}>
+              {t("Cancel", "रद्द करें")}
+            </button>
+          )}
+          {w.recording && (
+            <button type="button" className="btn primary" onClick={w.sendRecording}>
+              {t("Send audio to transcribe", "लिखने के लिए ऑडियो भेजें")}
+            </button>
+          )}
           {w.transcribing && (
             <button
               type="button"
@@ -166,7 +177,10 @@ export function GrievanceView({ workspace: w }: { workspace: Workspace }) {
         {(w.recording || w.transcribing || w.startingMic) && (
           <div role="status" className="voice-status">
             {w.recording
-              ? t(`Recording ${w.seconds}s / 60s`, `रिकॉर्डिंग ${w.seconds} / 60 सेकंड`)
+              ? t(
+                  `Recording ${w.seconds}s / 60s — send audio to transcribe or stop to discard.`,
+                  `रिकॉर्डिंग ${w.seconds} / 60 सेकंड — लिखने के लिए ऑडियो भेजें या हटाने के लिए रोकें।`,
+                )
               : w.transcribing
                 ? t(
                     "Transcribing… Review the words before confirming.",
