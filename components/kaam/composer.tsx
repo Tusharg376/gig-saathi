@@ -1,3 +1,4 @@
+import { PlaybackControls } from "./playback-controls";
 import type { Workspace } from "@/hooks/kaam/use-workspace";
 import {
   ArrowRight,
@@ -5,13 +6,16 @@ import {
   ShieldCheck,
   Sparkles,
   Square,
-  Pause,
-  Play,
   LoaderCircle,
-  Volume2,
 } from "lucide-react";
 
-export function Composer({ workspace }: { workspace: Workspace }) {
+export function Composer({
+  workspace,
+  hidePlayback = false,
+}: {
+  workspace: Workspace;
+  hidePlayback?: boolean;
+}) {
   const {
     input,
     setInput,
@@ -20,9 +24,6 @@ export function Composer({ workspace }: { workspace: Workspace }) {
     recording,
     transcribing,
     startingMic,
-    playing,
-    paused,
-    togglePause,
     seconds,
     abort,
     inputRef,
@@ -35,31 +36,7 @@ export function Composer({ workspace }: { workspace: Workspace }) {
   } = workspace;
   return (
     <div className="composer-wrap">
-      {playing && (
-        <div
-          className="playback-controls"
-          aria-label={t("Answer audio", "जवाब की आवाज़")}
-        >
-          <span>
-            <Volume2 size={16} />
-            {busy
-              ? t("Preparing audio…", "आवाज़ तैयार हो रही है…")
-              : paused
-                ? t("Audio paused — tap Resume", "आवाज़ रुकी है — फिर से चलाएँ")
-                : t("Reading answer aloud", "जवाब सुनाया जा रहा है")}
-          </span>
-          {!busy && (
-            <button type="button" className="text-btn" onClick={togglePause}>
-              {paused ? <Play size={18} /> : <Pause size={18} />}
-              {paused ? t("Resume", "फिर से चलाएँ") : t("Pause", "विराम")}
-            </button>
-          )}
-          <button type="button" className="text-btn" onClick={stopAudio}>
-            <Square size={16} />
-            {t("Stop", "बंद करें")}
-          </button>
-        </div>
-      )}
+      {!hidePlayback && <PlaybackControls workspace={workspace} />}
       {(transcribing || startingMic || recording) && (
         <div className="voice-status" role="status" id="voice-status">
           <span>

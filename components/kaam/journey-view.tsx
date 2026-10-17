@@ -1,16 +1,11 @@
+import { SafetyView } from "./journeys/safety-view";
+import { SchemesView } from "./journeys/schemes-view";
+import { DocumentsView } from "./journeys/documents-view";
+import { GrievanceView } from "./journeys/grievance-view";
+import { PlaybackControls } from "./playback-controls";
 import type { Workspace } from "@/hooks/kaam/use-workspace";
 import { csv, totals } from "@/lib/kaam/contracts";
-import {
-  ArrowDownToLine,
-  ArrowLeft,
-  ClipboardCheck,
-  Globe2,
-  Pencil,
-  Plus,
-  Trash2,
-  Upload,
-  Wallet,
-} from "lucide-react";
+import { ArrowDownToLine, ArrowLeft, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { descriptions, download, money } from "./presentation";
 
 import { Conversation } from "./conversation";
@@ -20,25 +15,17 @@ export function JourneyView({ workspace }: { workspace: Workspace }) {
     view,
     language,
 
-    busy,
-
     setEntry,
 
     setDeleteTarget,
-    setGrievanceOpen,
     from,
     setFrom,
     to,
     setTo,
-    docConsent,
-    setDocConsent,
-    fileRef,
     hi,
     t,
     label,
     navigate,
-    ensureProfile,
-    upload,
     filtered,
     sum,
     CurrentIcon,
@@ -218,92 +205,34 @@ export function JourneyView({ workspace }: { workspace: Workspace }) {
           </section>
         </>
       )}
-      {view === "documents" && (
-        <section className="upload-panel">
-          <span className="upload-icon">
-            <Upload size={28} />
-          </span>
-          <div>
-            <h2>{t("Paperwork, made a little easier.", "कागज़ात समझना हुआ आसान।")}</h2>
-            <p>
-              {t(
-                "Upload a clear photo or PDF. Saathi will explain it and help you spot missing details.",
-                "साफ़ फोटो या PDF भेजें। साथी इसे समझाएगा और गायब जानकारी पहचानने में मदद करेगा।",
-              )}
-            </p>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={docConsent}
-                onChange={(e) => setDocConsent(e.target.checked)}
-              />
-              {t(
-                "I agree to send this file to Google for AI processing. Avoid sharing full ID numbers or bank details.",
-                "मैं यह फ़ाइल AI सहायता के लिए Google को भेजने की सहमति देता/देती हूँ। पूरे पहचान नंबर या बैंक जानकारी साझा न करें।",
-              )}
-            </label>
-            <div className="row">
-              <button
-                className="btn primary"
-                disabled={!docConsent || busy}
-                onClick={() => {
-                  if (ensureProfile()) fileRef.current?.click();
-                }}
-              >
-                <Plus size={17} />
-                {t("Choose a document", "दस्तावेज़ चुनें")}
-              </button>
-              <small>
-                JPEG, PNG, PDF · 10 MB · {t("20 pages max", "अधिकतम 20 पन्ने")}
-              </small>
-            </div>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,application/pdf"
-              hidden
-              onChange={(e) => {
-                if (e.target.files?.[0]) upload(e.target.files[0]);
-              }}
-            />
-          </div>
-        </section>
-      )}
-      {view === "welfare" && (
-        <div className="notice journey-notice">
-          <Globe2 size={20} />
-          <span>
-            {t(
-              "Guidance checked against official sources, tailored to your state. Final eligibility is decided by the relevant authority.",
-              "आपके राज्य के अनुसार आधिकारिक स्रोतों से जाँची गई जानकारी। अंतिम पात्रता संबंधित विभाग तय करता है।",
+      {view === "safety" && <SafetyView workspace={workspace} />}
+      {view === "welfare" && <SchemesView workspace={workspace} />}
+      {view === "documents" && <DocumentsView workspace={workspace} />}
+      {view === "grievance" && <GrievanceView workspace={workspace} />}
+      {view === "general" || view === "earnings" ? (
+        <Conversation workspace={workspace} />
+      ) : (
+        <>
+          <PlaybackControls workspace={workspace} />
+          <section className="journey-assistant">
+            <button
+              className="btn secondary"
+              aria-expanded={workspace.assistantOpen}
+              aria-controls="journey-conversation"
+              onClick={() => workspace.setAssistantOpen(!workspace.assistantOpen)}
+            >
+              {workspace.assistantOpen
+                ? t("Close conversation", "बातचीत बंद करें")
+                : t("Need more help? Ask Saathi", "और मदद चाहिए? साथी से पूछें")}
+            </button>
+            {workspace.assistantOpen && (
+              <div id="journey-conversation">
+                <Conversation workspace={workspace} hidePlayback />
+              </div>
             )}
-          </span>
-        </div>
+          </section>
+        </>
       )}
-      {view === "grievance" && (
-        <button
-          className="btn secondary"
-          disabled={busy}
-          onClick={() => {
-            if (ensureProfile()) setGrievanceOpen(true);
-          }}
-        >
-          <ClipboardCheck size={18} />
-          {t("Add & confirm facts", "तथ्य भरें और पुष्टि करें")}
-        </button>
-      )}
-      {view === "grievance" && (
-        <div className="notice journey-notice">
-          <Pencil size={20} />
-          <span>
-            {t(
-              "Tell Saathi what happened, when, who it concerns, and what outcome you want. Confirm the facts before a draft is created.",
-              "साथी को बताएँ कि क्या हुआ, कब हुआ, किससे शिकायत है और आप क्या समाधान चाहते हैं। ड्राफ़्ट बनने से पहले तथ्यों की पुष्टि करें।",
-            )}
-          </span>
-        </div>
-      )}
-      {<Conversation workspace={workspace} />}
     </>
   );
 }

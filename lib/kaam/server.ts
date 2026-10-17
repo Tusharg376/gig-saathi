@@ -84,7 +84,12 @@ export function parseAnswer(text: string) {
     throw new ApiError("INVALID_AI_RESPONSE");
   }
 }
-export async function analyzeDocument(profile: unknown, file: File, signal: AbortSignal) {
+export async function analyzeDocument(
+  profile: unknown,
+  file: File,
+  signal: AbortSignal,
+  task = "Explain this document and help me understand what to do next.",
+) {
   const data = await file.arrayBuffer();
   const result = await gemini(
     {
@@ -105,7 +110,7 @@ export async function analyzeDocument(profile: unknown, file: File, signal: Abor
               text: JSON.stringify({
                 profile,
                 currentDate: localDate(),
-                task: "Explain this document and help me understand what to do next.",
+                task,
               }),
             },
             {

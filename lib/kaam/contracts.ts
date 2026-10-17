@@ -55,6 +55,7 @@ export const answerSchema = z.object({
     .nullable()
     .default(null),
 });
+export const documentTaskSchema = z.string().trim().min(1).max(2000);
 export const grievanceSchema = z.object({
   incident: z.string().trim().min(5).max(4000),
   recipient: z.string().trim().min(1).max(300),
@@ -62,6 +63,24 @@ export const grievanceSchema = z.object({
   amount: z.number().finite().min(0).max(10000000).nullable(),
   resolution: z.string().trim().min(3).max(2000),
   confirmed: z.literal(true),
+  moneyInvolved: z.enum(["yes", "no", "unknown"]).optional(),
+  category: z
+    .enum(["unpaid", "deduction", "account", "harassment", "consumer", "other"])
+    .optional(),
+  contact: z
+    .object({
+      name: z.string().max(100),
+      phone: z.string().max(30),
+      city: z.string().max(100),
+    })
+    .optional(),
+  references: z
+    .object({
+      orderId: z.string().max(100),
+      productNumber: z.string().max(100),
+      evidence: z.string().max(1000),
+    })
+    .optional(),
 });
 export type GrievanceFacts = z.infer<typeof grievanceSchema>;
 const totalAmount = z.number().finite().min(0).max(1e12);

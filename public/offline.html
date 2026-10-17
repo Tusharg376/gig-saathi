@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#226758" />
+    <title>KaamSaathi · Offline</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        min-height: 90vh;
+        display: grid;
+        place-items: center;
+        background: #faf9f5;
+        color: #273c37;
+        font:
+          18px/1.7 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 440px;
+      }
+      img {
+        border-radius: 24px;
+      }
+      button {
+        background: #226758;
+        color: white;
+        border: 0;
+        border-radius: 12px;
+        padding: 14px 24px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 3px solid #273c37;
+        outline-offset: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/app-192.png" width="80" height="80" alt="KaamSaathi" />
+      <h1>इंटरनेट से फिर जुड़ें</h1>
+      <p>
+        KaamSaathi खोलने और AI सहायता के लिए इंटरनेट चाहिए। कनेक्शन आने पर फिर कोशिश करें।
+      </p>
+      <p lang="en">
+        You’re offline. Reconnect to open KaamSaathi and use AI assistance. Your saved
+        records have not been deleted.
+      </p>
+      <button onclick="location.reload()">फिर कोशिश करें / Try again</button>
+    </main>
+  </body>
+</html>

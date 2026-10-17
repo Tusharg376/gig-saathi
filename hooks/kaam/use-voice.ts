@@ -16,6 +16,7 @@ type Options = {
   setError: Dispatch<SetStateAction<string>>;
   setInput: Dispatch<SetStateAction<string>>;
   setToast: Dispatch<SetStateAction<string>>;
+  focusInput?: () => void;
   inputRef: RefObject<HTMLTextAreaElement | null>;
   abort: RefObject<AbortController | null>;
 };
@@ -28,6 +29,7 @@ export function useVoice({
   setInput,
   setToast,
   inputRef,
+  focusInput,
   abort,
 }: Options) {
   const t = (en: string, hi: string) => (language === "hi" ? hi : en);
@@ -110,7 +112,8 @@ export function useVoice({
           );
           setInput((prev) => [prev, result.text].filter(Boolean).join(" "));
           setToast(t("Review your words, then send.", "अपनी बात जाँचकर भेजें।"));
-          inputRef.current?.focus();
+          if (focusInput) focusInput();
+          else inputRef.current?.focus();
         } catch (e) {
           if (!(e instanceof DOMException && e.name === "AbortError"))
             setError(e instanceof Error ? e.message : "REQUEST_FAILED");

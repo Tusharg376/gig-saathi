@@ -14,7 +14,13 @@ import {
 import { ArrowUpRightIcon, money } from "./presentation";
 
 import { Composer } from "./composer";
-export function Conversation({ workspace }: { workspace: Workspace }) {
+export function Conversation({
+  workspace,
+  hidePlayback = false,
+}: {
+  workspace: Workspace;
+  hidePlayback?: boolean;
+}) {
   const {
     saving,
     view,
@@ -234,12 +240,7 @@ export function Conversation({ workspace }: { workspace: Workspace }) {
                     onClick={() => {
                       setDocumentContext(m.answer!.document);
                       navigate("grievance");
-                      setInput(
-                        t(
-                          "Help me prepare a concern about this document. Ask me which facts need confirming.",
-                          "इस दस्तावेज़ से जुड़ी शिकायत तैयार करने में मदद करें। मुझसे ज़रूरी तथ्यों की पुष्टि पूछें।",
-                        ),
-                      );
+                      setInput("");
                     }}
                   >
                     {t("Use this in a grievance", "शिकायत तैयार करने में इस्तेमाल करें")}
@@ -292,7 +293,7 @@ export function Conversation({ workspace }: { workspace: Workspace }) {
           <div ref={endRef} />
         </div>
       )}
-      {<Composer workspace={workspace} />}
+      {<Composer workspace={workspace} hidePlayback={hidePlayback} />}
     </section>
   );
 }

@@ -76,3 +76,15 @@ The assistant receives totals for every confirmed entry in the selected date ran
 - For initial setup or deliberate secret updates, run `npm run build` followed by `npx wrangler deploy --config dist/server/wrangler.json --secrets-file .env.local`. This sends the ignored local environment values to Cloudflare as secrets; never commit the file.
 - Deployment is currently manual. Pushing to GitHub alone does not trigger a Cloudflare deployment.
 - New visitors begin with empty browser storage. Local QA records are not uploaded or shared.
+
+## Mobile installation
+
+KaamSaathi is a Progressive Web App. Open the live HTTPS address on a phone; the bilingual install card offers Chrome's native install dialog when the browser exposes it, or browser menu instructions otherwise. On iPhone/iPad, open in Safari and use Share → Add to Home Screen → Add. Installation adds a home-screen icon and opens the site in its own window. The browser controls eligibility and when the native prompt becomes available; a first visit can show instructions before that happens. Dismissal lasts for the current browser session, with an Install app button available to reopen the card.
+
+The public service worker caches installation icons and a bilingual offline page only. It never caches AI responses, API requests, uploads, or worker records. Opening the application and using AI still requires internet access. Existing browser records are not transferred automatically when a platform uses separate storage for its installed app.
+
+## Dedicated worker tools
+
+Stay Safe opens emergency dialling and prepares an optional location/landmark message for WhatsApp. Rights & Schemes contains a selected, dated official-source directory, search and categories, plus live personalized checks and the wider myScheme directory. Document Help accepts a chosen task and question with the upload, presents structured results and corrections, and carries them into a complaint. Raise a Concern collects confirmed facts and optional contact/reference fields, creates an editable letter and explains suitable official complaint routes. AI chat remains available as an optional layer on each page.
+
+Directory facts and source-maintenance requirements are documented in `docs/reference/feature-directory-review.md`. They are public reference content; worker records still start empty. Location and complaint forms are session-only unless a worker explicitly saves a generated draft. Calls, WhatsApp sends, scheme applications and complaint submissions remain with the worker.

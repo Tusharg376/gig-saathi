@@ -39,6 +39,9 @@ export function useWorkspace() {
   useNavigationFocus(sidebar, closeNavigation);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [complaintIncident, setComplaintIncident] = useState("");
+  const voiceTarget = useRef<"chat" | "complaint">("chat");
+  const complaintInputRef = useRef<HTMLTextAreaElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
@@ -53,9 +56,10 @@ export function useWorkspace() {
     kind: "entry" | "draft" | "all";
     id?: string;
   } | null>(null);
-  const [grievanceOpen, setGrievanceOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [documentLoading, setDocumentLoading] = useState(false);
   const [docConsent, setDocConsent] = useState(false);
 
   const [docEditMessageId, setDocEditMessageId] = useState<string | null>(null);
@@ -128,6 +132,7 @@ export function useWorkspace() {
   }
   function navigate(next: View) {
     setView(next);
+    setAssistantOpen(false);
     setSidebar(false);
     setError("");
   }
@@ -144,8 +149,14 @@ export function useWorkspace() {
     return true;
   }
 
-  async function ask(text = input, forcedMode?: Mode, grievance?: GrievanceFacts) {
+  async function ask(
+    text = input,
+    forcedMode?: Mode,
+    grievance?: GrievanceFacts,
+    showConversation = true,
+  ) {
     if (!text.trim() || busy || recording || startingMic || !ensureProfile()) return;
+    if (showConversation) setAssistantOpen(true);
     stopAudio();
     const mode =
       forcedMode ||
@@ -158,7 +169,7 @@ export function useWorkspace() {
     let reply: ChatMessage | undefined;
     const history = messages.slice(-16).map((m) => ({ role: m.role, text: m.text }));
     setMessages((prev) => [...prev, user]);
-    setInput("");
+    if (!grievance) setInput("");
     setError("");
     setBusy(true);
     if (view === "home" || view === "saved" || view === "settings") setView("general");
@@ -207,8 +218,9 @@ export function useWorkspace() {
       abort.current = null;
     }
     if (reply) void speak(reply, true);
+    return reply;
   }
-  async function upload(file: File) {
+  async function upload(file: File, task?: string) {
     if (!ensureProfile() || busy) return;
     if (!docConsent) return;
     stopAudio();
@@ -219,6 +231,8 @@ export function useWorkspace() {
       return setError("INVALID_FILE");
     const form = new FormData();
     form.set("file", file);
+    if (task) form.set("task", task);
+    setDocumentLoading(true);
     form.set("profile", JSON.stringify({ ...data.profile, language }));
     setBusy(true);
     abort.current = new AbortController();
@@ -256,6 +270,7 @@ export function useWorkspace() {
     } finally {
       setBusy(false);
       abort.current = null;
+      setDocumentLoading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
     if (reply) void speak(reply, true);
@@ -271,7 +286,7 @@ export function useWorkspace() {
     startingMic,
     recorder,
     discardAudio,
-    startRecording,
+    startRecording: beginRecording,
     record,
   } = useVoice({
     busy,
@@ -279,11 +294,27 @@ export function useWorkspace() {
     ensureProfile,
     language,
     setError,
-    setInput,
+    setInput: (update) => {
+      if (voiceTarget.current === "complaint") setComplaintIncident(update);
+      else setInput(update);
+    },
     setToast,
     inputRef,
+    focusInput: () =>
+      (voiceTarget.current === "complaint"
+        ? complaintInputRef.current
+        : inputRef.current
+      )?.focus(),
     abort,
   });
+  function startRecording() {
+    if (!recording) voiceTarget.current = "chat";
+    return beginRecording();
+  }
+  function startComplaintRecording() {
+    if (!recording) voiceTarget.current = "complaint";
+    return beginRecording();
+  }
   const { playing, paused, audio, stopAudio, togglePause, speak } = usePlayback({
     busy,
     recording,
@@ -336,6 +367,7 @@ export function useWorkspace() {
         setLanguage("hi");
         setMessages([]);
         setInput("");
+        setComplaintIncident("");
         setFrom("");
         setTo("");
         setDraft(null);
@@ -413,6 +445,14 @@ export function useWorkspace() {
     general: [["Help me understand my options", "मेरे विकल्प समझने में मदद करें"]],
   };
   return {
+    complaintIncident,
+    setComplaintIncident,
+    complaintInputRef,
+    startComplaintRecording,
+    documentContext,
+    documentLoading,
+    assistantOpen,
+    setAssistantOpen,
     docEditMessageId,
     setDocEditMessageId,
     onboarding,
@@ -447,8 +487,6 @@ export function useWorkspace() {
     setDraft,
     deleteTarget,
     setDeleteTarget,
-    grievanceOpen,
-    setGrievanceOpen,
     from,
     setFrom,
     to,

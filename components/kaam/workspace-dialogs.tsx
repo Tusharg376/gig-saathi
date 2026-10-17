@@ -1,6 +1,5 @@
 import type { Workspace } from "@/hooks/kaam/use-workspace";
-import { grievanceSchema } from "@/lib/kaam/contracts";
-import { ArrowDownToLine, Check, Copy, Mic, Pencil, Printer, Trash2 } from "lucide-react";
+import { ArrowDownToLine, Check, Copy, Mic, Printer, Trash2 } from "lucide-react";
 import { Dialog, download, EarningForm, ProfileForm } from "./presentation";
 
 export function WorkspaceDialogs({ workspace }: { workspace: Workspace }) {
@@ -22,8 +21,6 @@ export function WorkspaceDialogs({ workspace }: { workspace: Workspace }) {
     setDraft,
     deleteTarget,
     setDeleteTarget,
-    grievanceOpen,
-    setGrievanceOpen,
 
     setVoiceConsent,
     voiceDialog,
@@ -40,7 +37,6 @@ export function WorkspaceDialogs({ workspace }: { workspace: Workspace }) {
     t,
 
     persist,
-    ask,
     record,
     saveEntry,
     saveDraft,
@@ -166,10 +162,23 @@ export function WorkspaceDialogs({ workspace }: { workspace: Workspace }) {
           onClose={() => setDocEdit(null)}
         >
           <div className="stack">
+            <label>
+              {t(
+                "Summary — update it if a correction changes its meaning",
+                "सारांश — सुधार से अर्थ बदले तो इसे भी बदलें",
+              )}
+              <textarea
+                rows={3}
+                maxLength={10000}
+                value={docEdit.summary}
+                onChange={(e) => setDocEdit({ ...docEdit, summary: e.target.value })}
+              />
+            </label>
             {docEdit.fields.map((field, i) => (
               <label key={i}>
                 {field.label}
                 <input
+                  maxLength={1000}
                   value={field.value}
                   onChange={(e) =>
                     setDocEdit({
@@ -240,88 +249,6 @@ export function WorkspaceDialogs({ workspace }: { workspace: Workspace }) {
               {t("Delete", "हटाएँ")}
             </button>
           </div>
-        </Dialog>
-      )}
-      {grievanceOpen && (
-        <Dialog
-          title={t("The facts behind your concern", "आपकी शिकायत के तथ्य")}
-          onClose={() => setGrievanceOpen(false)}
-        >
-          <form
-            className="stack"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              const facts = grievanceSchema.safeParse({
-                incident: f.get("incident"),
-                recipient: f.get("recipient"),
-                dates: f.get("dates"),
-                amount: f.get("amount") === "" ? null : Number(f.get("amount")),
-                resolution: f.get("resolution"),
-                confirmed: f.get("confirmed") === "on",
-              });
-              if (!facts.success) {
-                setError("INVALID_INPUT");
-                return;
-              }
-              setGrievanceOpen(false);
-              ask(
-                t(
-                  "Please draft my grievance using only these confirmed facts.",
-                  "कृपया केवल इन पुष्ट तथ्यों से मेरी शिकायत लिखें।",
-                ),
-                "grievance",
-                facts.data,
-              );
-            }}
-          >
-            <label>
-              {t("What happened?", "क्या हुआ?")}
-              <textarea
-                name="incident"
-                required
-                minLength={5}
-                maxLength={4000}
-                rows={3}
-              />
-            </label>
-            <label>
-              {t("Who is this addressed to?", "शिकायत किसके लिए है?")}
-              <input name="recipient" required maxLength={300} />
-            </label>
-            <label>
-              {t("Relevant date(s)", "संबंधित तारीखें")}
-              <input name="dates" required maxLength={300} />
-            </label>
-            <label>
-              {t(
-                "Amount in dispute (₹), leave blank if not applicable",
-                "विवादित रकम (₹), लागू न हो तो खाली छोड़ें",
-              )}
-              <input name="amount" type="number" min="0" max="10000000" step="0.01" />
-            </label>
-            <label>
-              {t("What resolution would you like?", "आप क्या समाधान चाहते हैं?")}
-              <textarea
-                name="resolution"
-                required
-                minLength={3}
-                maxLength={2000}
-                rows={2}
-              />
-            </label>
-            <label className="checkbox-label" style={{ flexDirection: "row" }}>
-              <input type="checkbox" name="confirmed" required />
-              {t(
-                "I confirm these facts are accurate.",
-                "मैं पुष्टि करता/करती हूँ कि ये तथ्य सही हैं।",
-              )}
-            </label>
-            <button className="btn primary">
-              <Pencil size={17} />
-              {t("Generate my draft", "मेरा ड्राफ़्ट बनाएँ")}
-            </button>
-          </form>
         </Dialog>
       )}
       {voiceDialog && (

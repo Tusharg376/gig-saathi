@@ -1,5 +1,5 @@
 import { PDFDocument } from "pdf-lib";
-import { profileSchema } from "@/lib/kaam/contracts";
+import { profileSchema, documentTaskSchema } from "@/lib/kaam/contracts";
 import { ApiError, analyzeDocument, fail, noStore, originGuard } from "@/lib/kaam/server";
 export async function POST(req: Request) {
   try {
@@ -18,6 +18,10 @@ export async function POST(req: Request) {
     } catch {
       throw new ApiError("INVALID_INPUT", 400);
     }
+    const task = documentTaskSchema.safeParse(
+      form.get("task") ?? "Explain this document and help me understand what to do next.",
+    );
+    if (!task.success) throw new ApiError("INVALID_INPUT", 400);
     const bytes = new Uint8Array(await file.arrayBuffer());
     const valid =
       file.type === "application/pdf"
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
       }
       if (pdf.getPageCount() > 20) throw new ApiError("TOO_MANY_PAGES", 400);
     }
-    return Response.json(await analyzeDocument(profile, file, req.signal), {
+    return Response.json(await analyzeDocument(profile, file, req.signal, task.data), {
       headers: noStore,
     });
   } catch (e) {
