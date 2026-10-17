@@ -2877,14 +2877,87 @@ th,
   }
 }
 
-/* Installation stays above the mobile navigation and respects device safe areas. */
+/* Installation shares the existing header without adding a page row. */
+.install-slot {
+  flex-shrink: 0;
+}
+.install-slot:empty {
+  display: none;
+}
+.install-widget {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.install-label-short {
+  display: none;
+}
+.onboarding-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.onboarding-header .onboarding-brand {
+  margin-bottom: 0;
+}
+.install-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 9px 17px;
+  border-radius: 24px;
+  background: var(--teal);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 3px 12px #22675822;
+}
+.install-trigger:hover {
+  background: var(--teal-dark);
+}
+.install-attention {
+  animation: install-pulse 1.5s ease-out 3;
+}
+.install-attention > svg {
+  animation: install-nudge 1.5s ease-in-out 3;
+}
+.install-trigger:is(:hover, :focus-visible) {
+  animation: none;
+}
+.install-trigger:is(:hover, :focus-visible) > svg {
+  animation: none;
+}
+@keyframes install-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 #22675800;
+  }
+  35% {
+    box-shadow: 0 0 0 6px #22675824;
+  }
+}
+@keyframes install-nudge {
+  0%,
+  30%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  15%,
+  45% {
+    transform: translateY(-3px);
+  }
+}
 .install-card {
-  position: fixed;
-  z-index: 45;
-  right: max(16px, env(safe-area-inset-right));
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  width: min(370px, calc(100vw - 32px));
-  max-height: 65dvh;
+  position: absolute;
+  z-index: 35;
+  right: 0;
+  top: calc(100% + 8px);
+  width: min(350px, calc(100vw - 32px));
+  max-height: min(65dvh, 450px);
   overflow-y: auto;
   padding: 18px;
   border: 1px solid var(--line);
@@ -2908,37 +2981,41 @@ th,
 .install-card p {
   margin: 10px 0 14px;
 }
-.install-card .btn {
-  width: 100%;
-}
-.install-instructions {
-  border-top: 1px solid var(--line);
-  margin-top: 14px;
-}
-.install-instructions small {
-  color: var(--muted);
-}
-.install-reopen {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  margin: 0 20px 24px auto;
-  padding: 9px 13px;
-  background: var(--white);
-  color: var(--teal-dark);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  box-shadow: 0 3px 12px #273c3715;
-}
-@media (max-width: 900px) {
-  .install-card {
-    bottom: calc(84px + env(safe-area-inset-bottom));
+@media (prefers-reduced-motion: reduce) {
+  .install-attention,
+  .install-attention > svg {
+    animation: none;
   }
 }
 
-@media (max-width: 900px) {
-  .install-reopen {
-    margin-bottom: calc(100px + env(safe-area-inset-bottom));
+@media (max-width: 600px) {
+  .topbar .breadcrumb > span {
+    display: none;
+  }
+  .install-label-long {
+    display: none;
+  }
+  .install-label-short {
+    display: inline;
+  }
+  .install-trigger {
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .onboarding-header {
+    gap: 8px;
+  }
+  .onboarding-header .onboarding-brand {
+    font-size: 18px;
+    gap: 7px;
+  }
+  .onboarding-header .onboarding-brand svg {
+    width: 26px;
+    height: 26px;
+  }
+  .onboarding-header .install-card {
+    width: min(350px, calc(100vw - 80px));
   }
 }

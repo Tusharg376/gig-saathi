@@ -199,6 +199,7 @@ export function WorkerWorkspace() {
             >
               <Settings2 size={19} />
             </button>
+            <div id="install-slot" className="install-slot" />
           </div>
         </header>
         <main className="content" id="main-content">

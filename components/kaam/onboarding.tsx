@@ -13,8 +13,11 @@ export function Onboarding({ workspace }: { workspace: Workspace }) {
   return (
     <main className="onboarding">
       <div className="onboarding-card">
-        <div className="onboarding-brand">
-          <HeartHandshake aria-hidden="true" size={32} /> KaamSaathi
+        <div className="onboarding-header">
+          <div className="onboarding-brand">
+            <HeartHandshake aria-hidden="true" size={32} /> KaamSaathi
+          </div>
+          <div id="install-slot" className="install-slot" />
         </div>
         {data.profile ? (
           <section className="welcome-ready" aria-labelledby="welcome-title">

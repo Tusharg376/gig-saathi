@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Download, Smartphone, X } from "lucide-react";
 
 type InstallEvent = Event & {
@@ -9,6 +10,7 @@ type InstallEvent = Event & {
 };
 
 export function InstallApp() {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
   const deferred = useRef<InstallEvent | null>(null);
   const [available, setAvailable] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -24,7 +26,11 @@ export function InstallApp() {
       display.matches ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
     const language = () => setHi(document.documentElement.lang !== "en");
+    const findSlot = () => setSlot(document.getElementById("install-slot"));
+    const slotObserver = new MutationObserver(findSlot);
+    slotObserver.observe(document.body, { childList: true, subtree: true });
     const frame = requestAnimationFrame(() => {
+      findSlot();
       setInstalled(standalone());
       setIos(
         /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -67,6 +73,7 @@ export function InstallApp() {
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      slotObserver.disconnect();
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
       display.removeEventListener("change", onDisplay);
@@ -103,78 +110,85 @@ export function InstallApp() {
     }
   }
 
-  if (installed) return null;
-  return (
-    <>
-      {!visible && (
-        <button className="install-reopen" onClick={() => setVisible(true)}>
-          <Download size={16} aria-hidden="true" />
-          {hi ? "ऐप इंस्टॉल करें" : "Install app"}
-        </button>
-      )}
-      {visible && (
-        <section
-          className="install-card"
-          aria-label={hi ? "KaamSaathi इंस्टॉल करें" : "Install KaamSaathi"}
-        >
+  if (installed || !slot) return null;
+  return createPortal(
+    <aside
+      className="install-widget"
+      aria-label={hi ? "KaamSaathi इंस्टॉल करें" : "Install KaamSaathi"}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          dismiss();
+          event.currentTarget
+            .querySelector<HTMLButtonElement>(".install-trigger")
+            ?.focus();
+        }
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setHelp(false);
+      }}
+    >
+      <button
+        className={"install-trigger" + (visible ? " install-attention" : "")}
+        disabled={busy}
+        aria-label={
+          busy
+            ? hi
+              ? "इंस्टॉल खुल रहा है"
+              : "Opening installation"
+            : hi
+              ? "ऐप इंस्टॉल करें"
+              : "Install app"
+        }
+        onClick={() => void install()}
+        aria-expanded={!available ? help : undefined}
+        aria-controls={!available ? "install-instructions" : undefined}
+      >
+        <Download size={18} aria-hidden="true" />
+        <span className="install-label-long">
+          {busy
+            ? hi
+              ? "खुल रहा है…"
+              : "Opening…"
+            : hi
+              ? "ऐप इंस्टॉल करें"
+              : "Install app"}
+        </span>
+        <span className="install-label-short" aria-hidden="true">
+          {busy ? "…" : hi ? "इंस्टॉल" : "Install"}
+        </span>
+      </button>
+      {help && (
+        <section className="install-card" id="install-instructions">
           <div className="install-heading">
-            <Smartphone size={24} aria-hidden="true" />
+            <Smartphone size={22} aria-hidden="true" />
             <strong>
               {hi ? "KaamSaathi अपने फ़ोन पर पाएँ" : "Keep KaamSaathi on your phone"}
             </strong>
             <button
               className="icon-btn"
               onClick={dismiss}
-              aria-label={hi ? "अभी नहीं" : "Dismiss install suggestion"}
+              aria-label={hi ? "बंद करें" : "Close installation instructions"}
             >
               <X size={18} />
             </button>
           </div>
           <p>
-            {hi
-              ? "होम स्क्रीन से सीधे खोलें। डाउनलोड करने के लिए कोई स्टोर ज़रूरी नहीं।"
-              : "Open straight from your home screen. No app store needed."}
-          </p>
-          <button
-            className="btn primary"
-            disabled={busy}
-            onClick={() => void install()}
-            aria-expanded={!available ? help : undefined}
-            aria-controls={!available ? "install-instructions" : undefined}
-          >
-            <Download size={18} aria-hidden="true" />
-            {busy
+            {ios
               ? hi
-                ? "खुल रहा है…"
-                : "Opening…"
-              : available
-                ? hi
-                  ? "ऐप इंस्टॉल करें"
-                  : "Install app"
-                : hi
-                  ? "इंस्टॉल करने का तरीका"
-                  : "How to install"}
-          </button>
-          {help && (
-            <div id="install-instructions" className="install-instructions" role="status">
-              <p>
-                {ios
-                  ? hi
-                    ? "Safari में यह वेबसाइट खोलें। शेयर बटन दबाएँ → ‘होम स्क्रीन पर जोड़ें’ → ‘जोड़ें’।"
-                    : "Open this website in Safari. Tap Share → Add to Home Screen → Add."
-                  : hi
-                    ? "Chrome का ⋮ मेन्यू खोलें → ‘ऐप इंस्टॉल करें’ या ‘होम स्क्रीन पर जोड़ें’ चुनें। विकल्प न दिखे तो कुछ देर वेबसाइट इस्तेमाल करें और फिर कोशिश करें।"
-                    : "Open Chrome’s ⋮ menu → Install app or Add to Home screen. If the option is missing, use the website for a while and try again."}
-              </p>
-              <small>
-                {hi
-                  ? "AI सहायता के लिए इंटरनेट ज़रूरी है।"
-                  : "AI assistance needs an internet connection."}
-              </small>
-            </div>
-          )}
+                ? "Safari में यह वेबसाइट खोलें। शेयर बटन दबाएँ → ‘होम स्क्रीन पर जोड़ें’ → ‘जोड़ें’।"
+                : "Open this website in Safari. Tap Share → Add to Home Screen → Add."
+              : hi
+                ? "Chrome का ⋮ मेन्यू खोलें → ‘ऐप इंस्टॉल करें’ या ‘होम स्क्रीन पर जोड़ें’ चुनें। विकल्प न दिखे तो कुछ देर वेबसाइट इस्तेमाल करें और फिर कोशिश करें।"
+                : "Open Chrome’s ⋮ menu → Install app or Add to Home screen. If the option is missing, use the website for a while and try again."}
+          </p>
+          <small>
+            {hi
+              ? "AI सहायता के लिए इंटरनेट ज़रूरी है।"
+              : "AI assistance needs an internet connection."}
+          </small>
         </section>
       )}
-    </>
+    </aside>,
+    slot,
   );
 }

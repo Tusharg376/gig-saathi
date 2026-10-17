@@ -179,3 +179,20 @@ Provider references used for the implementation: [Gemini Transcribe model](https
 - Existing saved QA profile, earnings (₹900 income / ₹200 expense / ₹700 net) and saved draft were preserved. No real emergency calls, WhatsApp messages, private contacts or precise device locations were transmitted during QA. Physical-phone geolocation, dialler/WhatsApp launch, microphone capture and OS installation still require device verification. Live voice tests use generated QA audio, not a physical microphone.
 - Production verification: the deployed client journey bundle and PWA public assets matched the local build byte-for-byte. A live production Hindi complaint call preserved the extended confirmed order ID and ₹900 amount. Initial combined version: `a08a07cf-d9e3-4585-932b-af4dfef7e93a`.
 - Final mobile review moved the dismissed-install shortcut into page flow so it cannot cover form inputs; the initial install suggestion remains dismissible. No functional AI logic changed in this visual adjustment.
+
+## Compact install control — 17 October 2026
+
+- Replaced the automatic floating install card with a compact button fixed at the top right. A reserved 64px top strip (plus safe area) keeps the button clear of onboarding fields and navigation; sidebar and sticky header offsets follow the same spacing.
+- Added a gentle pulse and a 3px download-icon nudge, three 1.5-second cycles. Animations stop on hover/focus and are disabled by `prefers-reduced-motion: reduce`.
+- Installation help appears only after tapping the button when the native prompt is unavailable. It closes with its close button, Escape (restoring trigger focus), or when focus moves to the form. Native installation and installed-mode detection are retained.
+- Browser QA used an isolated production preview origin without deleting retained worker records. Verified desktop and 390×844 phone onboarding, all three setup selectors clear of the install strip, no horizontal overflow, instructions opening, and automatic dismissal when focusing the language field. Also checked the returning-worker screen in English and Escape dismissal. Computed animation properties confirm 1.5 seconds and three cycles. Reduced-motion handling is present in CSS; OS preference switching was not exercised.
+- All 28 existing tests, type checking, lint, production build and diff whitespace checks passed. Build retains its existing experimental glob and route-classification notices. No AI calls or worker-record changes were needed.
+- Published to the existing live Cloudflare address as version `6212f3bb-70df-4aaf-ac4c-82a48b8b16e7`. Verified the new top-right install button in the live browser after reload.
+
+## Install button in existing header — 17 October 2026
+
+- Moved the install control into the existing workspace top bar, beside the language/settings controls. Onboarding places it beside the existing KaamSaathi brand. Removed the separate installation row, body padding and sidebar/header offsets.
+- Uses a short visible label on phones and retains the full accessible name. The installation controller remains mounted in the root layout and renders into the active header, preserving deferred browser install events while screens change. Existing brief animation, reduced-motion rule and on-demand help are retained.
+- Browser checks at 320px width: workspace top bar stays 65px tall, body has zero extra top padding, install button lies inside the header, instructions remain within the viewport, and no horizontal overflow. The isolated onboarding preview has the brand and button on one row without overlap; setup fields remain clear.
+- All 28 tests, lint, type checking, production build and diff whitespace checks passed. Existing experimental glob/route-classification build notices remain. No AI calls or saved worker-record changes were needed.
+- Published header integration to the existing Cloudflare URL as version `8ea5eaac-ae74-4155-b6e7-7cdaf7f72e28`.
