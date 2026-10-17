@@ -1,4 +1,4 @@
-import { response } from "@/lib/kaam/client";
+import { request } from "@/lib/kaam/client";
 import type { Language } from "@/lib/kaam/contracts";
 import {
   useEffect,
@@ -100,12 +100,13 @@ export function useVoice({
           form.set("audio", new Blob(chunks, { type: rec.mimeType }), "recording");
           form.set("duration", String(duration));
           form.set("language", language);
-          const result = await response<{ text: string }>(
-            await fetch("/api/transcribe", {
+          const result = await request<{ text: string }>(
+            "/api/transcribe",
+            {
               method: "POST",
               body: form,
-              signal: abort.current.signal,
-            }),
+            },
+            abort.current.signal,
           );
           setInput((prev) => [prev, result.text].filter(Boolean).join(" "));
           setToast(t("Review your words, then send.", "अपनी बात जाँचकर भेजें।"));

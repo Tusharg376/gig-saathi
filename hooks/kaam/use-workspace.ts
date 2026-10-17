@@ -1,6 +1,6 @@
 import { useNavigationFocus } from "./use-navigation-focus";
 import { icons, labels, View } from "@/components/kaam/presentation";
-import { parsedAnswer, response } from "@/lib/kaam/client";
+import { parsedAnswer, request } from "@/lib/kaam/client";
 import { createLedgerContext } from "@/lib/kaam/context";
 import {
   totals,
@@ -165,8 +165,9 @@ export function useWorkspace() {
     abort.current = new AbortController();
     try {
       const result = parsedAnswer(
-        await response<Answer>(
-          await fetch("/api/assistant", {
+        await request<Answer>(
+          "/api/assistant",
+          {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -183,8 +184,8 @@ export function useWorkspace() {
                 : undefined,
               grievance,
             }),
-            signal: abort.current.signal,
-          }),
+          },
+          abort.current.signal,
         ),
       );
       reply = {
@@ -232,12 +233,13 @@ export function useWorkspace() {
     ]);
     try {
       const answer = parsedAnswer(
-        await response<Answer>(
-          await fetch("/api/documents", {
+        await request<Answer>(
+          "/api/documents",
+          {
             method: "POST",
             body: form,
-            signal: abort.current.signal,
-          }),
+          },
+          abort.current.signal,
         ),
       );
       setDocumentContext(answer.document);

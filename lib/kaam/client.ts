@@ -18,3 +18,22 @@ export function parsedAnswer(raw: Answer): Answer {
         : undefined,
   };
 }
+
+// Resolve cancellation immediately even if a transport delays aborting its response.
+export function withAbort<T>(pending: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const cancelled = () => reject(new DOMException("Request cancelled", "AbortError"));
+    if (signal.aborted) cancelled();
+    else signal.addEventListener("abort", cancelled, { once: true });
+    pending
+      .then(resolve, reject)
+      .finally(() => signal.removeEventListener("abort", cancelled));
+  });
+}
+export function request<T>(
+  url: string,
+  init: RequestInit,
+  signal: AbortSignal,
+): Promise<T> {
+  return withAbort(fetch(url, { ...init, signal }).then(response<T>), signal);
+}

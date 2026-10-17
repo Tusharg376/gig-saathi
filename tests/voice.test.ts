@@ -55,3 +55,21 @@ test("transcription extracts only completed model text without translating mixed
   );
   assert.throws(() => parseTranscript({ steps: "invalid" }));
 });
+
+test("cancellation settles immediately even when the transport returns late", async () => {
+  const { withAbort } = await import("../lib/kaam/client");
+  const controller = new AbortController();
+  let finish!: (value: string) => void;
+  const pending = new Promise<string>((resolve) => {
+    finish = resolve;
+  });
+  const result = withAbort(pending, controller.signal);
+  controller.abort();
+  await assert.rejects(result, { name: "AbortError" });
+  finish("late response must not replace the cancelled draft");
+  await assert.rejects(result, { name: "AbortError" });
+  assert.equal(
+    await withAbort(Promise.resolve("ok"), new AbortController().signal),
+    "ok",
+  );
+});

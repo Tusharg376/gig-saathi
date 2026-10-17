@@ -1,4 +1,4 @@
-import { response } from "@/lib/kaam/client";
+import { response, withAbort } from "@/lib/kaam/client";
 import type { ChatMessage, Language } from "@/lib/kaam/contracts";
 import {
   useEffect,
@@ -75,14 +75,17 @@ export function usePlayback({
     request.current = controller;
     abortRef.current = controller;
     try {
-      const res = await fetch("/api/speech", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: message.text.slice(0, 5000), language }),
-        signal: controller.signal,
-      });
+      const res = await withAbort(
+        fetch("/api/speech", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: message.text.slice(0, 5000), language }),
+          signal: controller.signal,
+        }),
+        controller.signal,
+      );
       if (!res.ok) await response(res);
-      const blob = await res.blob();
+      const blob = await withAbort(res.blob(), controller.signal);
       controller.signal.throwIfAborted();
       audioUrl.current = URL.createObjectURL(blob);
       const player = new Audio(audioUrl.current);
