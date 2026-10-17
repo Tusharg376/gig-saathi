@@ -733,8 +733,8 @@ h1 {
   field-sizing: content;
 }
 .send-btn {
-  height: 36px;
-  width: 36px;
+  height: 44px;
+  width: 44px;
   display: grid;
   place-items: center;
   background: var(--teal);

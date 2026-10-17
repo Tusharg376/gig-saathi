@@ -196,9 +196,10 @@ export function useWorkspace() {
       setMessages((prev) => [...prev, reply!]);
     } catch (e) {
       setMessages((previous) => previous.filter((message) => message.id !== user.id));
+      // Preserve a newer typed draft; otherwise restore the interrupted question.
+      setInput((current) => current || text);
       if (!(e instanceof DOMException && e.name === "AbortError")) {
         setError(e instanceof Error ? e.message : "REQUEST_FAILED");
-        setInput(text);
       }
     } finally {
       setBusy(false);

@@ -152,3 +152,4 @@ Physical microphone recording and the 60-second hardware capture limit have not 
 
 Provider references used for the implementation: [Gemini Transcribe model](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-transcribe) and [transcription API](https://ai.google.dev/gemini-api/docs/transcribe).
 - Follow-up mobile check: disabling automatic read-aloud immediately stopped the paused audio and removed its playback controls. At 390 px the DOM reported no horizontal overflow.
+- Final polish: the Send control is 44 × 44 px. Cancelling or failing an assistant request restores its text if the worker has not started a newer draft, avoiding lost input.
