@@ -1,0 +1,10 @@
+node_modules
+dist
+.wrangler
+.sites-runtime
+sources
+outputs
+work
+package-lock.json
+build
+scripts

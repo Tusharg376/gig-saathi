@@ -10,11 +10,11 @@ Requirements: Node.js 22.13 or newer, npm, and a Gemini API key with access to t
 
 1. Run `npm ci`.
 2. Copy `.env.example` to `.env.local` and add `GEMINI_API_KEY`. Keep this file private. Never put the key in browser code or chat.
-3. Optionally change `GEMINI_MODEL` and `GEMINI_TTS_MODEL` to model IDs available to your account. Defaults are `gemini-3.8-flash` and `gemini-3.8-flash-tts`. Model availability and API quotas are account-dependent.
+3. Optionally change `GEMINI_MODEL`, `GEMINI_TTS_MODEL`, and `GEMINI_TRANSCRIBE_MODEL` to model IDs available to your account. Defaults are `gemini-3.8-flash`, `gemini-3.8-flash-tts`, and `gemini-3.5-transcribe`. Model availability and API quotas are account-dependent.
 4. Run `npm run dev` and visit the printed URL, normally `http://localhost:5173`.
-5. Set your language, work type and state. Start with your own earnings or question. Restart the server after editing environment variables.
+5. First-time visitors see Hindi setup on arrival, with English available. Choose work type and state, then continue from the full-page confirmation directly into a conversation or earnings. Returning visitors keep their saved preferences. Restart the server after editing environment variables.
 
-The local dev configuration loads only the three `GEMINI_` settings into server-side Worker bindings. It does not expose them to the client or embed them in production bundles. `npm run build` checks production packaging; serving that build requires supplying runtime secrets separately. The Cloudflare deployment target is configured in `vite.config.ts`; production Gemini credentials are stored as encrypted Worker secrets.
+The local dev configuration loads only the four allowlisted `GEMINI_` settings into server-side Worker bindings. It does not expose them to the client or embed them in production bundles. `npm run build` checks production packaging; serving that build requires supplying runtime secrets separately. The Cloudflare deployment target is configured in `vite.config.ts`; production Gemini credentials are stored as encrypted Worker secrets.
 
 ## Journeys
 
@@ -23,7 +23,7 @@ The local dev configuration loads only the three `GEMINI_` settings into server-
 - **Rights and schemes:** Gemini searches current sources, then synthesis uses only grounding segments supported by official government sources. Citations include retrieval dates. Eligibility is provisional.
 - **Documents:** consent-based JPEG/PNG/PDF upload, explanation, extracted fields, correction and follow-up. Max 10 MB, 20 PDF pages. Encrypted/unreadable PDFs are rejected.
 - **Grievances:** conversational fact gathering plus an explicit confirmed-facts form, editable drafts, explicit local save, copy, text download and print. No submission integration.
-- **Voice:** tap the microphone, consent, record up to 60 seconds, then review the transcript before sending. Use Listen on assistant messages for Gemini-generated audio.
+- **Voice:** tap the microphone, consent, record up to 60 seconds, then review the transcript before sending. A dedicated speech-to-text model handles Hindi, English, and mixed speech. The composer shows microphone setup, elapsed recording time, and an indeterminate transcription progress bar. Recording stops before transcription begins; this is not live word-by-word dictation. Use Listen on assistant messages for Gemini-generated audio, or enable automatic read-aloud in setup/profile (off by default). Pause, Resume, and Stop stay beside the composer. If autoplay is blocked, tap Resume; prepared audio is reused. Switching the preference off stops playback.
 
 ## Storage and privacy
 
@@ -45,12 +45,27 @@ AI errors return stable codes with bilingual UI messages. Missing keys, quota li
 
 ## Checks
 
+- `npm run format:check`
+- `npm run lint` (zero warnings)
 - `npm run typecheck`
 - `npm test`
 - `npm run build`
 - `npm run test:routes` (with the local server running; no live AI requests are made)
+- `RUN_LIVE_AI=1 TEST_BASE_URL=http://127.0.0.1:5180 node tests/live-journeys.mjs` (explicitly spends Gemini quota; optional `LIVE_CASE=welfare-hi` selects one case). Results go to ignored `outputs/`. Use the port printed by your local server.
 
 Tests use isolated fixtures only; the application has no sample records. See `VALIDATION.md` for executed checks and outstanding live-provider verification.
+
+The trial-score review and prioritized improvement backlog are in [VALIDATION.md](VALIDATION.md#trial-submission-review). Future work should follow the event and engineering guidance in [AGENTS.md](AGENTS.md), derived from the supplied [host transcript](docs/reference/event-host-transcript.txt).
+
+## Code organization
+
+- `components/kaam/`: mobile workspace, onboarding, conversation, journey views and named dialogs.
+- `hooks/kaam/`: workspace orchestration, recording/playback lifecycle and keyboard navigation.
+- `lib/kaam/`: validated contracts, paise arithmetic, bounded ledger context, safe IndexedDB transactions, provider transport, prompts and official-source grounding.
+- `tests/`: isolated regression tests, API boundary checks and an opt-in live Gemini matrix.
+- `.github/workflows/checks.yml`: formatting, lint, types, focused tests and production build on pushes and pull requests. Live AI calls are deliberately separate from CI.
+
+The assistant receives totals for every confirmed entry in the selected date range plus at most 30 recent details. Partial details are explicitly identified as a sample. Corrected document fields remain in transient conversation context and can be carried into a grievance; only explicitly confirmed grievance facts authorize drafting.
 
 ## Cloudflare deployment
 

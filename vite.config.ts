@@ -5,8 +5,7 @@ import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
 import { connectorPreview } from "./build/connector-preview-plugin.mjs";
 
-const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
-  "00000000-0000-4000-8000-000000000000";
+const SITE_CREATOR_PLACEHOLDER_DATABASE_ID = "00000000-0000-4000-8000-000000000000";
 
 const { d1, r2 } = hostingConfig;
 
@@ -19,7 +18,13 @@ const localBindingConfig = {
   account_id: "ab65894ceb7937adae03ccf1950e6c45",
   workers_dev: true,
   preview_urls: false,
-  ratelimits: [{ name: "AI_RATE_LIMITER", namespace_id: "91740601", simple: { limit: 20, period: 60 as const } }],
+  ratelimits: [
+    {
+      name: "AI_RATE_LIMITER",
+      namespace_id: "91740601",
+      simple: { limit: 20, period: 60 as const },
+    },
+  ],
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
@@ -58,9 +63,7 @@ export default defineConfig(async ({ command }) => {
 
   return {
     server: {
-      ...(managedLinux
-        ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }
-        : {}),
+      ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
       ...(isCodexSeatbeltSandbox
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),
@@ -74,7 +77,21 @@ export default defineConfig(async ({ command }) => {
         inspectorPort: false,
         config: {
           ...localBindingConfig,
-          ...(command === "serve" ? { vars: Object.fromEntries(Object.entries(loadEnv("development", process.cwd(), "GEMINI_")).filter(([key]) => ["GEMINI_API_KEY", "GEMINI_MODEL", "GEMINI_TTS_MODEL"].includes(key))) } : {}),
+          ...(command === "serve"
+            ? {
+                vars: Object.fromEntries(
+                  Object.entries(loadEnv("development", process.cwd(), "GEMINI_")).filter(
+                    ([key]) =>
+                      [
+                        "GEMINI_API_KEY",
+                        "GEMINI_MODEL",
+                        "GEMINI_TTS_MODEL",
+                        "GEMINI_TRANSCRIBE_MODEL",
+                      ].includes(key),
+                  ),
+                ),
+              }
+            : {}),
           ...(command === "serve"
             ? {
                 services: [

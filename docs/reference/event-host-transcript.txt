@@ -1,0 +1,85 @@
+Speaker 1: Which they do not count. All this information I'll put in the WhatsApp group that everybody has joined. Now, the main thing: in warm-up challenge you get 1 submission attempt, because warm-up is a practice round.
+Speaker 1:  In main challenge you get 3 submission attempts. So if you make 1 submission, you get a score, you feel like you can improve on it, you'll get another submission attempt.
+Speaker 1:  And then if you feel like you can improve more on it, you have 3rd submission attempt in the main challenge. But the score in the 3rd submission attempt is what counts.
+Speaker 1:  For example, in my first submission attempt I scored 70. I feel like I can score more; I need to build it properly.
+Speaker 1:  In the second submission attempt I got 95. I feel like there's a certain amount of improvement that I can do that can help me score more.
+Speaker 1:  I'll make 1 more submission attempt and I get a score of 60. That 60 will be counted.
+Speaker 1:  Only your final submission attempt score will be counted towards the leaderboard. Okay.
+Speaker 1:  Now, this is for your understanding, this is for your, you know, better articulation on what you have to build. I've highlighted here certain parameters that you need to focus more upon.
+Speaker 1:  All these parameters are important; it's just that certain parameters will help you to score more. Those parameters are code quality and the problem statement alignment.
+Speaker 1:  Make sure you utilize everything that you can conjure up in those two parameters. Then the security and efficiency, and finally testing and accessibility.
+Speaker 1:  All these parameters are important. Uh, let me reiterate, but make sure you focus more upon those that can help you score more.
+Speaker 1:  And for the testing, from what I've seen from my experience, you can use test cases. I've seen people scoring less in testing because they don't get an idea on what needs to be done in testing.
+Speaker 1:  So you can use test cases in for the testing part. Okay.
+Speaker 1:  Now, attempts and limits, I've already mentioned it, but in the warm-up challenge you'll get 1 submission attempt because it's a practice round. In the main challenge you'll get 3 submission attempts, and only your final submission attempt will be counted.
+Speaker 1:  Now, if a submission attempt fails due to a connectivity issue, only in that case we can allow 1 more retry. But that, you know, issue should be technical in nature.
+Speaker 1:  If you made a submission and then you're like, "I made it by mistake," in that case we'll not be able to give you 1 more submission attempt. But if your attempt, if your, if your issue is actually technical in nature, we can give you 1 more submission attempt.
+Speaker 1:  Now, tips on how not to get disqualified. So after the challenge closes, our team runs a hands-on functional evaluation for each and every submission to find out who the top 10 are.
+Speaker 1:  Now, by each and every submission I mean we go by the basis of leaderboard until we find who our top 10 are. So if you have scored second last but we find top 10 before that, so it's highly likely we'll not be evaluating that.
+Speaker 1:  This is for everyone's clarity. Okay.
+Speaker 1:  So by the leaderboard we'll go to identify who our top 10 will be. Now, certain things that will definitely get you disqualified are starting and hard-coded pages.
+Speaker 1:  They should not be hard-coded. They should not be starting pages.
+Speaker 1:  Mock or fake data, that should not be there. Hallucinated AI responses.
+Speaker 1:  Before you make a submission, check thoroughly whether everything that you've, you know, added onto that is actually working. There are no static hard-coded pages, no mock data, no hallucinated responses.
+Speaker 1:  And finally, there should be no false positives. Okay.
+Speaker 1:  Instead of that, make sure every feature that you add, you run a demo for it. But leave certain tokens for us as well so that by the time it reaches us, we have tokens so that we can evaluate as well.
+Speaker 1:  Now, if you're using GenAI, which you have to use, make it a real call. Now, use using login auth, uh, auth.
+Speaker 1:  Make sure if you're using login, you provide the username there itself so that our team can take it up from there. And finally, test end to end before you submit.
+Speaker 1:  This point I'll keep reiterating throughout the day: test before you submit, because whatever you submit, that is what reaches us and that is what we'll evaluate. Okay.
+Speaker 1:  Bottom line: we test what you submit. We build features that genuinely work, not add more features that eventually, you know, reduce the quality of the project.
+Speaker 1:  Now, the leaderboard and final ranking. Leaderboard rankings are determined exclusively by the parameters which I already mentioned: the code quality, security, testing, efficiency, problem statement alignment.
+Speaker 1:  The live leaderboard throughout the challenges will be visible on the right-hand side. As soon as you make a submission, you'll be able to see the leaderboard on the right-hand side.
+Speaker 1:  Now, the scores are, scores from the warm-up round, they are excluded because, again, warm-up is a practice round. This is for your understanding on how the platform works.
+Speaker 1:  Lastly, once the challenge is completed, our team will assess the submission basis these parameters, whether they are working properly or aligned with the problem statement. If not, you'll be disqualified.
+Speaker 1:  And if there's somebody who's below you on the leaderboard, they might get a chance above you. Again, only scores from the main challenge are counted, and only your final submission will be counted.
+Speaker 1:  Scores from the warm-up challenge will not be counted. Now, everything that I mentioned until now is all technical, and I can see people already getting bored.
+Speaker 1:  But we have kept this initiative fun as well. So there are certain rewards that we've kept for everyone who's present here, not restricted to only, you know, people, uh, with the technical knowledge.
+Speaker 1:  Somebody we see who's helping the person next to them, we have a reward for them. Somebody we see made an attempt, and in the first attempt they got a higher score, but in the last attempt they got a really bad score.
+Speaker 1:  We have a reward for them as well. Somebody who scored 90 in the very first submission attempt, we also have a reward.
+Speaker 1:  Somebody that we identify has checked in at the very last, we have not left them alone as well. We have a reward for them.
+Speaker 1:  So everybody gets a reward as long as you are there in our badges. Okay.
+Speaker 1:  Now, I believe everybody has received the jigsaw puzzle, the complete jigsaw puzzle. Awesome.
+Speaker 1:  And now there's one social media challenge which is also ongoing, and it has already started. What you need to do in this social media challenge is that you need to create a LinkedIn post about how your experience was at PromptWars Chandigarh.
+Speaker 1:  You can either post a picture of the venue next to the standee of your project that you're building. You need to create a LinkedIn post, and then on our platform you need to submit that link.
+Speaker 1:  By the time the challenge closes, whichever post has the highest engagement, they'll get a social note badge. We have three such badges, so we'll identify three people with most engagement.
+Speaker 1:  And this challenge closes when the main challenge closes at 2:30. Now, before I proceed for the warm-up challenge, I'll give you a brief of where to submit on the platform and how to submit.
+Speaker 1:  I believe everybody should use the same email ID with which you have registered, because only on that email ID your QR code was scanned. Only on that email ID you'll be able to see the submissions dashboard.
+Speaker 1:  Where you'll see, I'll just show you.
+Speaker 1:  If it works.
+Speaker 1:  Log in using the registered email ID, uh, for this event. And then on the innovator dashboard, you'll be able to see PromptWars Chandigarh.
+Speaker 1:  But make sure that you use the registered email ID. On the innovator dashboard, you'll be able to see PromptWars Chandigarh.
+Speaker 1:  Go to the dashboard. You'll be able to see the entire roadmap.
+Speaker 1:  This will tell you how the entire day looks like. In the submissions, you'll see challenge submission, video submission, and the warm-up challenge submission.
+Speaker 1:  Now, as I mentioned certain submission requirements, this is how it looked like. From the challenges, you need to select the challenge.
+Speaker 1:  From the GitHub repo link, here is where you'll, you know, put the GitHub repo. Here is where you'll put the deployed link.
+Speaker 1:  If you made any changes, if there's a second submission attempt, and the changes that you made in that submission attempt, you need to mention it here. Otherwise, here you'll have to mention what exactly are you building.
+Speaker 1:  Okay. Then you need to mention the GenAI services that you've used and where you've used it.
+Speaker 1:  These are four submission requirements. Now, for the video submission, there's another module, and it is only specifically for the video submission.
+Speaker 1:  But for the people that are present here, in the main challenge, like I showed you the dashboard, you'll have a video submission module. Now, for every submission that you make in the main challenge, you need to record a video.
+Speaker 1:  This is only for your submission to get submitted. But the submission that you're actually confident in, make sure that is your final video.
+Speaker 1:  You need to keep it in less than 5 minutes. For every submission, if you make 1 submission attempt, you need to record a video.
+Speaker 1:  But if you're not confident in that submission attempt, make sure you finish that video within 30 seconds. But if you make another submission attempt and you're actually confident in that submission, make sure you record a proper video of that submission, showcase every feature that you added in that, and keep that video less than 5 minutes.
+Speaker 1:  You can either unlist it on your, uh, YouTube, or you can put a Drive link here as long as it's accessible to us. Okay.
+Speaker 1:  This is how the entire submission module looks like. Here you'll have a quick link which will showcase what, uh, exactly you need to submit in the video and the entire structure of it.
+Speaker 1:  Now, on the right-hand side, as soon as you make a submission, you'll be able to see a leaderboard like this. As soon as someone makes a submission, there'll be a leaderboard present throughout.
+Speaker 1:  And if you keep updating your submission attempts, your score will change here.
+Speaker 1:  Now, whenever you make a submission, you'll get a score like this here. So that you get a better idea, idea which parameter have you scored the most on.
+Speaker 1:  And if a parameter you've scored less upon, you can work upon that. Okay.
+Speaker 1:  So this is for your understanding. Now, at exactly 10:30, we'll start our warm-up challenge.
+Speaker 1:  So we still have 7 minutes. But before that, I'll tell you what the warm-up challenge is so that you have these 7 minutes to actually think about what you're building.
+Speaker 1:  Because everybody's using AI, so more or less everybody's product will be same. Because if five people are using the same AI tool, it's highly likely that their product will be same.
+Speaker 1:  So these 7 minutes I'm giving you so that you can think upon what exactly you need to make. Make sure the project that you're making is customized as per you.
+Speaker 1:  So it should not look more like the AI that you're using. It should more like the person that you are, what you're thinking, and it should highlight in that project.
+Speaker 1:  Okay. With that being said, our warm-up challenge for PromptWars Chandigarh is this: a gig worker companion.
+Speaker 1:  You need to design and build a GenAI-powered assistant that supports gig and informal workers, such as delivery partners, daily wage workers, drivers, etc. The solution must leverage, must leverage generative AI as a core component to provide multilingual guidance on earnings tracking, safety practices, rights and welfare scheme awareness, documentation help, and grievance or dispute drafting in simple language.
+Speaker 1:  This is your warm-up challenge for today. A pro tip from our subject matter experts so that you, they help you build better.
+Speaker 1:  Functional checks are designed to evaluate your application as a whole, not just a single feature. Solutions with thoughtfully connected workflows and meaningful functionality provide evaluators with multiple opportunities to experience your application as you intend it to be.
+Speaker 1:  So all this information I provide, I'll provide on the WhatsApp group. A well-rounded application is also more resilient to isolated implementation issues, reducing the likelihood of a single broken flow impacting the overall functional evaluation.
+Speaker 1:  In simple language, make sure what you want to build is actually what we get. And make it customized as per you and not the byproduct of what AI is providing you.
+Speaker 1:  Okay. So at exactly 10:30, on the submission module, the warm-up challenge will open.
+Speaker 1:  That's when you can start building. Yes.
+Speaker 2:  Sir, internet is not working.
+Speaker 1:  Yeah, yeah. I've asked the person. He'll be fixing that.
+Speaker 2:  Can you share that?
+Speaker 1:  Sorry.
+Speaker 2:  Video submission.
