@@ -1,5 +1,7 @@
 # KaamSaathi
 
+Live: **https://gig-saathi.honeygautam0.workers.dev**
+
 A local-first, Hindi/English assistant for Indian gig and informal workers. React, TypeScript, Tailwind, Vinext, and Google Gemini. No seeded worker data or simulated AI responses.
 
 ## Run locally
@@ -12,7 +14,7 @@ Requirements: Node.js 22.13 or newer, npm, and a Gemini API key with access to t
 4. Run `npm run dev` and visit the printed URL, normally `http://localhost:5173`.
 5. Set your language, work type and state. Start with your own earnings or question. Restart the server after editing environment variables.
 
-The local dev configuration loads only the three `GEMINI_` settings into server-side Worker bindings. It does not expose them to the client or embed them in production bundles. `npm run build` checks production packaging; serving that build requires supplying runtime secrets separately. No deployment is configured or performed by this project.
+The local dev configuration loads only the three `GEMINI_` settings into server-side Worker bindings. It does not expose them to the client or embed them in production bundles. `npm run build` checks production packaging; serving that build requires supplying runtime secrets separately. The Cloudflare deployment target is configured in `vite.config.ts`; production Gemini credentials are stored as encrypted Worker secrets.
 
 ## Journeys
 
@@ -39,7 +41,7 @@ All routes are same-origin, server-side and return `Cache-Control: no-store`.
 - `POST /api/transcribe`: multipart `audio` and duration in seconds.
 - `POST /api/speech`: JSON `text` and `language`; returns WAV audio.
 
-AI errors return stable codes with bilingual UI messages. Missing keys, quota limits, timeouts, invalid model output and absent evidence never fall back to fabricated content. This version is intended for localhost; public hosting would require authentication/abuse controls and request quotas.
+AI errors return stable codes with bilingual UI messages. Missing keys, quota limits, timeouts, invalid model output and absent evidence never fall back to fabricated content. The public deployment rejects cross-origin API posts and applies a best-effort limit of 20 AI requests per minute per IP per Cloudflare location. Shared networks share this limit. This is a burst control, not a strict billing cap; Gemini quotas still apply. Worker records remain in each visitor’s browser.
 
 ## Checks
 
@@ -49,3 +51,13 @@ AI errors return stable codes with bilingual UI messages. Missing keys, quota li
 - `npm run test:routes` (with the local server running; no live AI requests are made)
 
 Tests use isolated fixtures only; the application has no sample records. See `VALIDATION.md` for executed checks and outstanding live-provider verification.
+
+## Cloudflare deployment
+
+- Worker project: `gig-saathi`
+- Live URL: https://gig-saathi.honeygautam0.workers.dev
+- Dashboard: https://dash.cloudflare.com/ab65894ceb7937adae03ccf1950e6c45/workers/services/view/gig-saathi/production
+- After authenticating with `npx wrangler login`, run `npm run deploy` to build and deploy updates. Existing production secrets are preserved.
+- For initial setup or deliberate secret updates, run `npm run build` followed by `npx wrangler deploy --config dist/server/wrangler.json --secrets-file .env.local`. This sends the ignored local environment values to Cloudflare as secrets; never commit the file.
+- Deployment is currently manual. Pushing to GitHub alone does not trigger a Cloudflare deployment.
+- New visitors begin with empty browser storage. Local QA records are not uploaded or shared.

@@ -30,4 +30,16 @@ Remaining live acceptance checks:
 - QA data kept at the user's request: Delivery partner / Delhi profile; one clearly labeled test earnings entry, ₹900 income, ₹200 expenses, 8 hours, ₹700 net.
 - These are browser-entered QA records, not seeded application data. A new browser profile starts empty.
 - Screenshots: `outputs/desktop-preview.jpg` and `outputs/mobile-hindi-preview.jpg`.
-- No deployment, worker accounts, government submission or third-party messaging was performed.
+- A public Cloudflare deployment was subsequently created; no worker accounts, government submission or third-party messaging was performed.
+
+## Public deployment — 17 October 2026
+
+- New Cloudflare Worker: `gig-saathi`, account `ab65894ceb7937adae03ccf1950e6c45`.
+- URL: https://gig-saathi.honeygautam0.workers.dev
+- Initial deployment version: `ccf365c6-2d8e-46f6-a16e-5561e6ba29ff`.
+- Type checks, production build and 15 focused tests passed before upload.
+- Exact-key scan confirmed no Gemini credential in client or server build artifacts. Credentials were uploaded separately as Worker secrets.
+- Public API guard covers foreign origins, oversized requests and a best-effort per-IP request limit.
+- Public URL returned HTTP 200, its JavaScript loaded, and the Gemini health check confirmed configuration.
+- Live English and Hindi assistant requests both returned HTTP 200 with generated responses.
+- Foreign-origin API requests returned HTTP 403; `/.env.local` was not publicly served.

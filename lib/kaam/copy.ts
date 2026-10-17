@@ -1,6 +1,7 @@
 import type { Language } from './contracts';
 export const errorText = (code: string, language: Language) => {
  const messages: Record<string,[string,string]> = {
+ RATE_LIMITED:['Too many requests in a short time. Please wait a minute and try again.','थोड़े समय में बहुत अनुरोध आए हैं। एक मिनट रुककर फिर कोशिश करें।'],
  KEY_MISSING:['Connect Gemini to get started. Add GEMINI_API_KEY to .env.local and restart the local server.','शुरू करने के लिए Gemini जोड़ें। .env.local में GEMINI_API_KEY डालकर लोकल सर्वर फिर शुरू करें।'],
  KEY_INVALID:['Gemini could not authenticate. Check your API key and its permissions.','Gemini से कनेक्शन नहीं हुआ। API कुंजी और अनुमति जाँचें।'],
  MODEL_UNAVAILABLE:['This Gemini model is unavailable for your key. Check GEMINI_MODEL or GEMINI_TTS_MODEL in your settings.','यह Gemini मॉडल आपकी कुंजी के लिए उपलब्ध नहीं है। मॉडल सेटिंग जाँचें।'],

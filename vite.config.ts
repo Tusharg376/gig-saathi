@@ -15,6 +15,11 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
+  name: "gig-saathi",
+  account_id: "ab65894ceb7937adae03ccf1950e6c45",
+  workers_dev: true,
+  preview_urls: false,
+  ratelimits: [{ name: "AI_RATE_LIMITER", namespace_id: "91740601", simple: { limit: 20, period: 60 as const } }],
   main: "./build/sites-worker.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
